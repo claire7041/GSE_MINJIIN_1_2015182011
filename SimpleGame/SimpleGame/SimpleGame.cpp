@@ -17,7 +17,12 @@ but WITHOUT ANY WARRANTY.
 #include "Object.h"
 
 Renderer *g_Renderer = NULL;
-Object obj({ 0, 0, 0 }, 10, { 1, 0.5, 0, 1 });
+Object* obj;
+
+void Init(void)
+{
+	obj = new Object({ 0, 0, 0 }, 10, { 1, 0.5, 0, 1 });
+}
 
 void RenderScene(void)
 {
@@ -25,14 +30,14 @@ void RenderScene(void)
 	glClearColor(0.1f, 0.1f, 0.7f, 1.0f);
 
 	// Renderer Test
-	g_Renderer->DrawSolidRect(obj.getPos().x, obj.getPos().y, obj.getPos().z, obj.getSize(), obj.getColor().r, obj.getColor().g, obj.getColor().b, obj.getColor().a);
-	obj.Update();
+	g_Renderer->DrawSolidRect(obj->getPos().x, obj->getPos().y, obj->getPos().z, obj->getSize(), obj->getColor().r, obj->getColor().g, obj->getColor().b, obj->getColor().a);
 
 	glutSwapBuffers();
 }
 
 void Idle(void)
 {
+	obj->Update();
 	RenderScene();
 }
 
@@ -76,6 +81,8 @@ int main(int argc, char **argv)
 	{
 		std::cout << "Renderer could not be initialized.. \n";
 	}
+
+	Init();
 
 	glutDisplayFunc(RenderScene);
 	glutIdleFunc(Idle);
