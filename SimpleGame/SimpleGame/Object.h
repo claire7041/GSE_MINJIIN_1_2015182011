@@ -3,15 +3,22 @@
 class Object
 {
 private:
-	Rect r;
-	Color c;
+	Vec3 pos;
+	Vec3 speed;
+	Color color;
+	float size;
 
 public:
 	Object();
-	Object(Rect rect, Color color);
+	Object(Vec3 p, float s, Color c);
 	~Object();
 
+	void Update();
+
 	Color getColor();
-	Rect getRect();
+	Vec3 getPos();
+	float getSize();
+
+	void setSpeed(Vec3 s);
 };
 

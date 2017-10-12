@@ -17,16 +17,16 @@ but WITHOUT ANY WARRANTY.
 #include "Object.h"
 
 Renderer *g_Renderer = NULL;
+Object obj({ 0, 0, 0 }, 10, { 1, 0.5, 0, 1 });
 
 void RenderScene(void)
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glClearColor(0.1f, 0.1f, 0.7f, 1.0f);
 
-	Object obj({ 0, 0, 0, 10 }, { 1, 0.5, 0, 1 });
-
 	// Renderer Test
-	g_Renderer->DrawSolidRect(obj.getRect().x, obj.getRect().y, obj.getRect().z, obj.getRect().size, obj.getColor().r, obj.getColor().g, obj.getColor().b, obj.getColor().a);
+	g_Renderer->DrawSolidRect(obj.getPos().x, obj.getPos().y, obj.getPos().z, obj.getSize(), obj.getColor().r, obj.getColor().g, obj.getColor().b, obj.getColor().a);
+	obj.Update();
 
 	glutSwapBuffers();
 }

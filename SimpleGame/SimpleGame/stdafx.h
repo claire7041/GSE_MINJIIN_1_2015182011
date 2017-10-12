@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <tchar.h>
 
+#define TIME 0.3
 
 struct Color
 {
@@ -14,10 +15,9 @@ struct Color
 	float a;
 };
 
-struct Rect
+struct Vec3
 {
 	float x;
 	float y;
 	float z;
-	float size;
 };
