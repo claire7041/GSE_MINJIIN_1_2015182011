@@ -20,5 +20,8 @@ public:
 	float getSize();
 
 	void setSpeed(Vec3 s);
+	void setPos(Vec3 newPos);
+	void setColor(Color c);
+	void setSize(float size);
 };
 

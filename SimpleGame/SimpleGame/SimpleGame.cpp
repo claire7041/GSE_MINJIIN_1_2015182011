@@ -10,6 +10,7 @@ but WITHOUT ANY WARRANTY.
 
 #include "stdafx.h"
 #include <iostream>
+#include <vector>
 #include "Dependencies\glew.h"
 #include "Dependencies\freeglut.h"
 
@@ -18,6 +19,7 @@ but WITHOUT ANY WARRANTY.
 
 Renderer *g_Renderer = NULL;
 Object* obj;
+bool flag = false;
 
 void Init(void)
 {
@@ -43,6 +45,18 @@ void Idle(void)
 
 void MouseInput(int button, int state, int x, int y)
 {
+	if (button == GLUT_LEFT_BUTTON)
+	{
+		if (state == GLUT_DOWN)
+			flag = true;
+
+		if (flag == true && state == GLUT_UP)
+		{
+			flag = false;
+			obj->setPos({ (float)x - 250, 250 - (float)y, 0.0f });
+		}
+	}
+
 	RenderScene();
 }
 
@@ -93,6 +107,7 @@ int main(int argc, char **argv)
 	glutMainLoop();
 
 	delete g_Renderer;
+	delete obj;
 
     return 0;
 }

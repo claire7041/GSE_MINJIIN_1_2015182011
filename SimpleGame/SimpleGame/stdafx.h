@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <tchar.h>
 
-#define TIME 0.3
+#define TIME 0.3f
 
 struct Color
 {
