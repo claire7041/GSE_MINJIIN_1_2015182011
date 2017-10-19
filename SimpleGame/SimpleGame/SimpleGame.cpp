@@ -9,21 +9,21 @@ but WITHOUT ANY WARRANTY.
 */
 
 #include "stdafx.h"
-#include <iostream>
-#include <vector>
 #include "Dependencies\glew.h"
 #include "Dependencies\freeglut.h"
 
 #include "Renderer.h"
-#include "Object.h"
+#include "SceneMgr.h"
 
 Renderer *g_Renderer = NULL;
-Object* obj;
+SceneMgr* scene;
+
 bool flag = false;
 
 void Init(void)
 {
-	obj = new Object({ 0, 0, 0 }, 10, { 1, 0.5, 0, 1 });
+	srand((unsigned)time(NULL));
+	scene = new SceneMgr;
 }
 
 void RenderScene(void)
@@ -32,14 +32,16 @@ void RenderScene(void)
 	glClearColor(0.1f, 0.1f, 0.7f, 1.0f);
 
 	// Renderer Test
-	g_Renderer->DrawSolidRect(obj->getPos().x, obj->getPos().y, obj->getPos().z, obj->getSize(), obj->getColor().r, obj->getColor().g, obj->getColor().b, obj->getColor().a);
-
+	for (int i = 0; i < MAX_OBJECTS_COUNT; ++i)
+	{
+		g_Renderer->DrawSolidRect(scene->getObject(i)->getPos().x, scene->getObject(i)->getPos().y, scene->getObject(i)->getPos().z, scene->getObject(i)->getSize(), scene->getObject(i)->getColor().r, scene->getObject(i)->getColor().g, scene->getObject(i)->getColor().b, scene->getObject(i)->getColor().a);
+	}
 	glutSwapBuffers();
 }
 
 void Idle(void)
 {
-	obj->Update();
+	scene->Update();
 	RenderScene();
 }
 
@@ -53,7 +55,7 @@ void MouseInput(int button, int state, int x, int y)
 		if (flag == true && state == GLUT_UP)
 		{
 			flag = false;
-			obj->setPos({ (float)x - 250, 250 - (float)y, 0.0f });
+			//obj->setPos({ (float)x - 250, 250 - (float)y, 0.0f });
 		}
 	}
 
@@ -107,7 +109,7 @@ int main(int argc, char **argv)
 	glutMainLoop();
 
 	delete g_Renderer;
-	delete obj;
+	delete scene;
 
     return 0;
 }

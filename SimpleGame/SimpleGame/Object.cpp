@@ -8,7 +8,7 @@ Object::Object()
 
 Object::Object(Vec3 p, float s, Color c) : pos(p), size(s), color(c)
 {
-	speed = { 0.1f, 0.1f, 0.0f };
+	speed = { ( 10.0f - (float)(rand() % 10)) / 100.0f, (10.0f - (float)(rand() % 10)) / 100.0f, 0.0f };
 }
 
 
@@ -49,6 +49,7 @@ void Object::setPos(Vec3 newPos)
 
 void Object::setColor(Color c)
 {
+	color = c;
 }
 
 void Object::setSize(float size)
