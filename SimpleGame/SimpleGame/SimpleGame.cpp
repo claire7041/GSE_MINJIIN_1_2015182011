@@ -12,36 +12,37 @@ but WITHOUT ANY WARRANTY.
 #include "Dependencies\glew.h"
 #include "Dependencies\freeglut.h"
 
-#include "Renderer.h"
 #include "SceneMgr.h"
 
-Renderer *g_Renderer = NULL;
-SceneMgr* scene;
+SceneMgr* scene = NULL;
+DWORD prevTime;
 
 bool flag = false;
 
 void Init(void)
 {
 	srand((unsigned)time(NULL));
-	scene = new SceneMgr;
+	prevTime = timeGetTime();
+	scene = new SceneMgr(500, 500);
 }
 
 void RenderScene(void)
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glClearColor(0.1f, 0.1f, 0.7f, 1.0f);
+	
+	DWORD currentTime = timeGetTime();
+	DWORD elapsedTime = currentTime - prevTime;
+	prevTime = currentTime;
 
-	// Renderer Test
-	for (int i = 0; i < MAX_OBJECTS_COUNT; ++i)
-	{
-		g_Renderer->DrawSolidRect(scene->getObject(i)->getPos().x, scene->getObject(i)->getPos().y, scene->getObject(i)->getPos().z, scene->getObject(i)->getSize(), scene->getObject(i)->getColor().r, scene->getObject(i)->getColor().g, scene->getObject(i)->getColor().b, scene->getObject(i)->getColor().a);
-	}
+	scene->Update((float)elapsedTime);
+	scene->Render();
+
 	glutSwapBuffers();
 }
 
 void Idle(void)
 {
-	scene->Update();
 	RenderScene();
 }
 
@@ -91,13 +92,6 @@ int main(int argc, char **argv)
 		std::cout << "GLEW 3.0 not supported\n ";
 	}
 
-	// Initialize Renderer
-	g_Renderer = new Renderer(500, 500);
-	if (!g_Renderer->IsInitialized())
-	{
-		std::cout << "Renderer could not be initialized.. \n";
-	}
-
 	Init();
 
 	glutDisplayFunc(RenderScene);
@@ -108,7 +102,6 @@ int main(int argc, char **argv)
 
 	glutMainLoop();
 
-	delete g_Renderer;
 	delete scene;
 
     return 0;

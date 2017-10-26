@@ -7,21 +7,27 @@ private:
 	Vec3 speed;
 	Color color;
 	float size;
+	int life;
+	bool col;
 
 public:
 	Object();
 	Object(Vec3 p, float s, Color c);
 	~Object();
 
-	void Update();
+	void Update(float elapsedTime);
 
 	Color getColor();
 	Vec3 getPos();
 	float getSize();
+	int getLife();
 
 	void setSpeed(Vec3 s);
 	void setPos(Vec3 newPos);
 	void setColor(Color c);
 	void setSize(float size);
+	void setCol(bool nowCol);
+
+	void minusLife();
 };
 
