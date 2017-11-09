@@ -12,7 +12,7 @@
 #include <time.h>
 
 #define TIME 0.3f
-#define MAX_OBJECTS_COUNT 50
+#define MAX_OBJECTS_COUNT 100
 #define MAX_CHARACTER_COUNT 10
 
 struct Color

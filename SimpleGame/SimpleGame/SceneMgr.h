@@ -13,6 +13,7 @@ class SceneMgr
 	int arrowNum;
 	Renderer* g_Renderer;
 	float bulletTime;
+	GLuint buildingTex;
 
 public:
 	SceneMgr();
@@ -27,6 +28,7 @@ public:
 	Renderer* getRenderer();
 
 	void CollisionBuilding();
+	void CollisionObjBuilding(Object* colObj[]);
 	void CollisionObj(Object* charObj[], Object* colObj[]);
 	void CollisionChar();
 

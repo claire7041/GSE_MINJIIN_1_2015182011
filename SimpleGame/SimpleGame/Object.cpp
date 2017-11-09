@@ -18,6 +18,7 @@ Object::Object(Vec3 p, int type) : pos(p), type(type)
 		dir.y = -1;
 	}
 	dir.z = 0;
+	id = -1;
 
 	if (type == OBJECT_BUILDING)
 	{
@@ -33,7 +34,9 @@ Object::Object(Vec3 p, int type) : pos(p), type(type)
 		lifeTime = 10;
 		speed = { 300, 300, 0 };
 		color = { 1.0f, 1.0f, 1.0f, 1.0f };
+		arrowTime = 0;
 		size = 10;
+		col = false;
 	}
 	else if (type == OBJECT_BULLET)
 	{
@@ -62,6 +65,11 @@ void Object::Update(float elapsedTime)
 {
 	float elapsedTimeinsecond = elapsedTime / 1000.0f;
 	
+	if (type == OBJECT_CHARACTER)
+	{
+		arrowTime += elapsedTimeinsecond;
+	}
+
 	if (type != OBJECT_BUILDING)
 		decreaseLifeTime(elapsedTimeinsecond);
 
@@ -128,6 +136,16 @@ bool Object::getCol()
 	return col;
 }
 
+float Object::getArrowTime()
+{
+	return arrowTime;
+}
+
+int Object::getId()
+{
+	return id;
+}
+
 Vec3 Object::getPos()
 {
 	return pos;
@@ -156,6 +174,21 @@ void Object::setSize(float size)
 void Object::setCol(bool nowCol)
 {
 	col = nowCol;
+}
+
+void Object::setId(int num)
+{
+	id = num;
+}
+
+void Object::setLifeTime()
+{
+	lifeTime = 1.0f;
+}
+
+void Object::initArrowTime()
+{
+	arrowTime = 0;
 }
 
 void Object::decreaseLifeTime(float elapsedTimeSecond)
