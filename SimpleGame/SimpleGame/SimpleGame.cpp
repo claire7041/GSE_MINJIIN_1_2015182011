@@ -56,6 +56,7 @@ void MouseInput(int button, int state, int x, int y)
 		if (flag == true && state == GLUT_UP)
 		{
 			flag = false;
+			scene->AddActorObject({ (float)x - 250, 250 - (float)y, 0.0f }, OBJECT_CHARACTER);
 			//obj->setPos({ (float)x - 250, 250 - (float)y, 0.0f });
 		}
 	}

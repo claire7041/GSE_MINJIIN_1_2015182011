@@ -4,8 +4,15 @@
 
 class SceneMgr
 {
-	Object* objArray[MAX_OBJECTS_COUNT];
+	Object* objArray[MAX_CHARACTER_COUNT];
+	Object* bulletArray[MAX_OBJECTS_COUNT];
+	Object* arrowArray[MAX_OBJECTS_COUNT];
+	Object* building;
+	int charNum;
+	int bulletNum;
+	int arrowNum;
 	Renderer* g_Renderer;
+	float bulletTime;
 
 public:
 	SceneMgr();
@@ -14,9 +21,14 @@ public:
 
 	void Update(float elapsedTime);
 	void Render();
+
+	void AddActorObject(Vec3 pos, int type);
 	Object* getObject(int i);
 	Renderer* getRenderer();
 
-	void CollisionObj();
+	void CollisionBuilding();
+	void CollisionObj(Object* charObj[], Object* colObj[]);
+	void CollisionChar();
+
 };
 

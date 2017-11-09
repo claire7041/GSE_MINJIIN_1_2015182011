@@ -13,6 +13,7 @@
 
 #define TIME 0.3f
 #define MAX_OBJECTS_COUNT 50
+#define MAX_CHARACTER_COUNT 10
 
 struct Color
 {
@@ -27,4 +28,13 @@ struct Vec3
 	float x;
 	float y;
 	float z;
+};
+
+enum ObjectType
+{
+	OBJECT_BUILDING = 0,
+	OBJECT_CHARACTER,
+	
+	OBJECT_BULLET,
+	OBJECT_ARROW,
 };
