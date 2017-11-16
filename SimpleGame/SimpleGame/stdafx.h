@@ -11,9 +11,15 @@
 #include <Windows.h>
 #include <time.h>
 
+#define WIN_X 500
+#define WIN_Y 800
+
 #define TIME 0.3f
 #define MAX_OBJECTS_COUNT 100
-#define MAX_CHARACTER_COUNT 10
+#define MAX_CHARACTER_COUNT 50
+
+#define TEAM_RED  0
+#define TEAM_BLUE 1
 
 struct Color
 {
@@ -34,7 +40,8 @@ enum ObjectType
 {
 	OBJECT_BUILDING = 0,
 	OBJECT_CHARACTER,
-	
 	OBJECT_BULLET,
 	OBJECT_ARROW,
 };
+
+

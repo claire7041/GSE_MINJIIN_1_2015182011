@@ -8,18 +8,26 @@ SceneMgr::SceneMgr()
 
 SceneMgr::SceneMgr(int x, int y)
 {
-	bulletTime = 0.5f;
 	g_Renderer = new Renderer(x, y);
 	if (!g_Renderer->IsInitialized())
 	{
 		std::cout << "Renderer could not be initialized.. \n";
 	}
 
-	buildingTex = g_Renderer->CreatePngTexture("./building.png");
+	buildingTex[0] = g_Renderer->CreatePngTexture("./redBuilding.png");
+	buildingTex[1] = g_Renderer->CreatePngTexture("./blueBuilding.png");
+
 	charNum = 0;
 	bulletNum = 0;
 	arrowNum = 0;
-	building = new Object({ 0.0f, 0.0f, 0.0f }, OBJECT_BUILDING);
+	spawnRedTime = 5.0f;
+	spawnBlueTime = 0.0f;
+
+	for (int i = 0; i < 3; ++i)
+	{
+		building[TEAM_RED][i] = new Object({ (150.0f * i) - 150.0f, 300.0f, 0.0f }, TEAM_RED, OBJECT_BUILDING);
+		building[TEAM_BLUE][i] = new Object({ (150.0f * i) - 150.0f, -300.0f, 0.0f }, TEAM_BLUE, OBJECT_BUILDING);
+	}
 }
 
 SceneMgr::~SceneMgr()
@@ -51,36 +59,83 @@ SceneMgr::~SceneMgr()
 		}
 	}
 
-	if(building != NULL)
-		delete building;
-	delete[] objArray;
+	for (int i = 0; i < 2; ++i)
+	{
+		for (int j = 0; j < 3; ++j)
+		{
+			if (building[i][j] != NULL)
+			{
+				delete building[i][j];
+				building[i][j] = NULL;
+			}
+		}
+	}
+	
+	/*delete[] objArray;
 	delete[] bulletArray;
-	delete[] arrowArray;
+	delete[] arrowArray;*/
 	delete g_Renderer;
 }
 
 void SceneMgr::Update(float elapsedTime)
 {
 	float elapsedTimeinsecond = elapsedTime / 1000.0f;
+	spawnRedTime -= elapsedTimeinsecond;
+	spawnBlueTime -= elapsedTimeinsecond;
 	
-	if (building != NULL)
+	if (spawnRedTime <= 0.0f)
 	{
-		bulletTime -= elapsedTimeinsecond;
-		if (bulletTime <= 0.0f)
-		{
-			AddActorObject({ 0.0f, 0.0f, 0.0f }, OBJECT_BULLET);
-		}
-
-		CollisionBuilding();
-		CollisionObjBuilding(arrowArray);
+		AddActorObject({(float)((rand() % WIN_X) - (WIN_X / 2)), (float)((rand() % (WIN_Y / 2))), 0.0f }, TEAM_RED, OBJECT_CHARACTER);
+		spawnRedTime = 5.0f;
 	}
+
+	for (int i = 0; i < 2; ++i)
+	{
+		for (int j = 0; j < 3; ++j)
+		{
+			if (building[i][j] != NULL)
+			{
+				if (building[i][j]->getArrowTime() >= 10.0f)
+				{
+					AddActorObject(building[i][j]->getPos(), building[i][j]->getTeam(), OBJECT_BULLET);
+					building[i][j]->initArrowTime();
+				}
+
+				if (building[i][j] != NULL)
+				{
+					CollisionBuilding(building[i][j]);
+					if (building[i][j]->getLife() < 1)
+					{
+						delete building[i][j];
+						building[i][j] = NULL;
+					}
+				}
+				if (building[i][j] != NULL)
+				{
+					CollisionObjBuilding(building[i][j], arrowArray);
+					if (building[i][j]->getLife() < 1)
+					{
+						delete building[i][j];
+						building[i][j] = NULL;
+					}
+				}
+			}
+		}
+	}
+
 	CollisionObj(objArray, bulletArray);
 	CollisionObj(objArray, arrowArray);
 
 
-	if (building != NULL)
+	for (int i = 0; i < 2; ++i)
 	{
-		building->Update(elapsedTime);
+		for (int j = 0; j < 3; ++j)
+		{
+			if (building[i][j] != NULL)
+			{
+				building[i][j]->Update(elapsedTime);
+			}
+		}
 	}
 
 	for (int i = 0; i < charNum; ++i)
@@ -88,9 +143,9 @@ void SceneMgr::Update(float elapsedTime)
 		if (objArray[i] != NULL) 
 		{
 			objArray[i]->Update(elapsedTime);
-			if (objArray[i]->getArrowTime() >= 0.5f)
+			if (objArray[i]->getArrowTime() >= 3.0f)
 			{
-				AddActorObject(objArray[i]->getPos(), OBJECT_ARROW);
+				AddActorObject(objArray[i]->getPos(), objArray[i]->getTeam(), OBJECT_ARROW);
 				arrowArray[arrowNum - 1]->setId(objArray[i]->getId());
 				objArray[i]->initArrowTime();
 			}
@@ -141,8 +196,15 @@ void SceneMgr::Update(float elapsedTime)
 
 void SceneMgr::Render()
 {
-	if(building != NULL) 
-		g_Renderer->DrawTexturedRect(building->getPos().x, building->getPos().y, building->getPos().z, building->getSize(), building->getColor().r, building->getColor().g, building->getColor().b, building->getColor().a, buildingTex);
+
+	for (int i = 0; i < 2; ++i)
+	{
+		for (int j = 0; j < 3; ++j)
+		{
+			if (building[i][j] != NULL)
+				g_Renderer->DrawTexturedRect(building[i][j]->getPos().x, building[i][j]->getPos().y, building[i][j]->getPos().z, building[i][j]->getSize(), building[i][j]->getColor().r, building[i][j]->getColor().g, building[i][j]->getColor().b, building[i][j]->getColor().a, buildingTex[i]);
+		}
+	}
 
 	for (int i = 0; i < charNum; ++i)
 	{
@@ -163,32 +225,38 @@ void SceneMgr::Render()
 	}
 }
 
-void SceneMgr::AddActorObject(Vec3 pos, int type)
+void SceneMgr::AddActorObject(Vec3 pos, int team, int type)
 {
 	if (type == OBJECT_BUILDING)
 	{
 	}
 	else if (type == OBJECT_CHARACTER)
 	{
-		if (charNum < MAX_CHARACTER_COUNT)
+		if (team == TEAM_RED || (team == TEAM_BLUE && spawnBlueTime <= 0.0f))
 		{
-			objArray[charNum] = new Object(pos, OBJECT_CHARACTER);
-			objArray[charNum]->setId(charNum);
-			charNum++;
-		}
-		else
-		{
-			int i = 0;
-			while (i < MAX_CHARACTER_COUNT)
+			if (charNum < MAX_CHARACTER_COUNT)
 			{
-				if (objArray[i] == NULL)
-				{
-					objArray[i] = new Object(pos, OBJECT_CHARACTER);
-					objArray[i]->setId(i);
-					break;
-				}
-				i++;
+				objArray[charNum] = new Object(pos, team, OBJECT_CHARACTER);
+				objArray[charNum]->setId(charNum);
+				charNum++;
 			}
+			else
+			{
+				int i = 0;
+				while (i < MAX_CHARACTER_COUNT)
+				{
+					if (objArray[i] == NULL)
+					{
+						objArray[i] = new Object(pos, team, OBJECT_CHARACTER);
+						objArray[i]->setId(i);
+						break;
+					}
+					i++;
+				}
+			}
+
+			if (team == TEAM_BLUE)
+				spawnBlueTime = 7.0F;
 		}
 	}
 	else if (type == OBJECT_BULLET)
@@ -198,9 +266,8 @@ void SceneMgr::AddActorObject(Vec3 pos, int type)
 			bulletNum = 0;
 		}
 
-		bulletArray[bulletNum] = new Object(pos, OBJECT_BULLET);
+		bulletArray[bulletNum] = new Object(pos, team, OBJECT_BULLET);
 		bulletNum++;
-		bulletTime = 0.5f;
 	}
 	else if(type == OBJECT_ARROW)
 	{
@@ -209,7 +276,7 @@ void SceneMgr::AddActorObject(Vec3 pos, int type)
 			arrowNum = 0;
 		}
 
-		arrowArray[arrowNum] = new Object(pos, OBJECT_ARROW);
+		arrowArray[arrowNum] = new Object(pos, team, OBJECT_ARROW);
 
 		arrowNum++;
 	}
@@ -225,7 +292,7 @@ Renderer * SceneMgr::getRenderer()
 	return g_Renderer;
 }
 
-void SceneMgr::CollisionBuilding()
+void SceneMgr::CollisionBuilding(Object* building)
 {
 	for (int i = 0; i < charNum; ++i)
 	{
@@ -235,7 +302,7 @@ void SceneMgr::CollisionBuilding()
 			{
 				if (objArray[i]->getPos().y + objArray[i]->getSize() / 2.0f >= building->getPos().y - (building->getSize()) / 2.0f && objArray[i]->getPos().y - (objArray[i]->getSize() / 2.0f) <= building->getPos().y + (building->getSize() / 2.0f))
 				{
-					if (!objArray[i]->getCol())
+					if (!objArray[i]->getCol() && objArray[i]->getTeam() != building->getTeam())
 					{
 						objArray[i]->setCol(true);
 						building->setColor({ 1.0f, 0.0f, 0.0f, 1.0f }, 0.1f);
@@ -259,16 +326,6 @@ void SceneMgr::CollisionBuilding()
 					objArray[i]->setCol(false);
 				}
 			}
-		}
-	}
-
-	if (building != NULL)
-	{
-		if (building->getLife() < 1)
-		{
-
-			delete building;
-			building = NULL;
 		}
 	}
 
@@ -299,7 +356,7 @@ void SceneMgr::CollisionBuilding()
 
 }
 
-void SceneMgr::CollisionObjBuilding(Object * colObj[])
+void SceneMgr::CollisionObjBuilding(Object* building, Object * colObj[])
 {
 	for (int i = 0; i < MAX_OBJECTS_COUNT; ++i)
 	{
@@ -309,25 +366,19 @@ void SceneMgr::CollisionObjBuilding(Object * colObj[])
 			{
 				if (colObj[i]->getPos().y + colObj[i]->getSize() / 2.0f >= building->getPos().y - (building->getSize()) / 2.0f && colObj[i]->getPos().y - (colObj[i]->getSize() / 2.0f) <= building->getPos().y + (building->getSize() / 2.0f))
 				{
+					if (building->getTeam() != colObj[i]->getTeam())
+					{
 						building->setColor({ 1.0f, 0.0f, 0.0f, 1.0f }, 0.1f);
 						building->minusLife(colObj[i]->getLife());
 
 						delete colObj[i];
 						colObj[i] = NULL;
+					}
 				}
 			}
 		}
 	}
 
-	if (building != NULL)
-	{
-		if (building->getLife() < 1)
-		{
-
-			delete building;
-			building = NULL;
-		}
-	}
 }
 
 void SceneMgr::CollisionObj(Object* charObj[], Object* colObj[])
@@ -344,11 +395,14 @@ void SceneMgr::CollisionObj(Object* charObj[], Object* colObj[])
 					{
 						if (charObj[i]->getPos().y + charObj[i]->getSize() / 2.0f >= colObj[j]->getPos().y - (colObj[j]->getSize()) / 2.0f && charObj[i]->getPos().y - (charObj[i]->getSize() / 2.0f) <= colObj[j]->getPos().y + (colObj[j]->getSize() / 2.0f))
 						{
-							charObj[i]->setColor({ 1.0f, 0.0f, 0.0f, 1.0f }, 0.1f);
-							charObj[i]->minusLife(colObj[j]->getLife());
+							if (charObj[i]->getTeam() != colObj[j]->getTeam())
+							{
+								charObj[i]->setColor({ 1.0f, 0.0f, 0.0f, 1.0f }, 0.1f);
+								charObj[i]->minusLife(colObj[j]->getLife());
 
-							delete colObj[j];
-							colObj[j] = NULL;
+								delete colObj[j];
+								colObj[j] = NULL;
+							}
 						}
 					}
 				}

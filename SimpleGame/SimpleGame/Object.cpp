@@ -6,17 +6,23 @@ Object::Object()
 {
 }
 
-Object::Object(Vec3 p, int type) : pos(p), type(type)
+Object::Object(Vec3 p, int team, int type) : pos(p), team(team), type(type)
 {
 	time = 0;
 
-	dir.x = (float)(1 - rand() % 3);
-	dir.y = (float)(1 - rand() % 3);
-	if (dir.x == 0 && dir.y == 0)
-	{
+	int x = rand() % 2;
+	int y = rand() % 2;
+
+	if(x == 0)
 		dir.x = 1;
+	else
+		dir.x = -1;
+
+	if (y == 0)
+		dir.y = 1;
+	else
 		dir.y = -1;
-	}
+
 	dir.z = 0;
 	id = -1;
 
@@ -25,17 +31,27 @@ Object::Object(Vec3 p, int type) : pos(p), type(type)
 		life = 500;
 		lifeTime = 500;
 		speed = { 0, 0, 0 };
-		color = { 1.0f, 1.0f, 0.0f, 1.0f };
-		size = 50;
+		size = 100;
+		arrowTime = 0;
+
+		if(team == TEAM_RED)
+			color = { 1.0f, 0.0f, 0.0f, 1.0f };
+		else if (team == TEAM_BLUE)
+			color = { 0.0f, 0.0f, 1.0f, 1.0f };
 	}
 	else if (type == OBJECT_CHARACTER)
 	{
 		life = 10;
 		lifeTime = 10;
 		speed = { 300, 300, 0 };
-		color = { 1.0f, 1.0f, 1.0f, 1.0f };
-		arrowTime = 0;
 		size = 10;
+		
+		if (team == TEAM_RED)
+			color = { 1.0f, 0.0f, 0.0f, 1.0f };
+		else if (team == TEAM_BLUE)
+			color = { 0.0f, 0.0f, 1.0f, 1.0f };
+
+		arrowTime = 0;
 		col = false;
 	}
 	else if (type == OBJECT_BULLET)
@@ -43,16 +59,24 @@ Object::Object(Vec3 p, int type) : pos(p), type(type)
 		life = 20;
 		lifeTime = 20;
 		speed = { 600, 600, 0 };
-		color = { 1.0f, 0.0f, 0.0f, 1.0f };
-		size = 5;
+		size = 2;
+
+		if (team == TEAM_RED)
+			color = { 1.0f, 0.0f, 0.0f, 1.0f };
+		else if (team == TEAM_BLUE)
+			color = { 0.0f, 0.0f, 1.0f, 1.0f };
 	}
 	else if (type == OBJECT_ARROW)
 	{
 		life = 10;
 		lifeTime = 10;
 		speed = { 100, 100, 0 };
-		color = { 0.0f, 1.0f, 0.0f, 1.0f };
-		size = 5;
+		size = 2;
+	
+		if (team == TEAM_RED)
+			color = { 0.5f, 0.2f, 0.7f, 1.0f };
+		else if(team == TEAM_BLUE)
+			color = { 1.0f, 1.0f, 0.0f, 1.0f };
 	}
 }
 
@@ -65,7 +89,7 @@ void Object::Update(float elapsedTime)
 {
 	float elapsedTimeinsecond = elapsedTime / 1000.0f;
 	
-	if (type == OBJECT_CHARACTER)
+	if (type == OBJECT_CHARACTER || type == OBJECT_BUILDING)
 	{
 		arrowTime += elapsedTimeinsecond;
 	}
@@ -74,7 +98,7 @@ void Object::Update(float elapsedTime)
 		decreaseLifeTime(elapsedTimeinsecond);
 
 	pos.x = pos.x + (speed.x * dir.x * elapsedTimeinsecond);
-	if (pos.x > 240 - size || pos.x < -240 + size)
+	if (pos.x > (WIN_X / 2 - 5) - size || pos.x < -(WIN_X / 2 - 5) + size)
 	{
 		if (type == OBJECT_CHARACTER)
 		{
@@ -87,7 +111,7 @@ void Object::Update(float elapsedTime)
 		}
 	}
 	pos.y = pos.y + (speed.y * dir.y * elapsedTimeinsecond);
-	if (pos.y > 240 - size || pos.y < -240 + size)
+	if (pos.y > (WIN_Y / 2 - 5) - size || pos.y < -(WIN_Y / 2 - 5) + size)
 	{
 		if (type == OBJECT_CHARACTER)
 		{
@@ -139,6 +163,11 @@ bool Object::getCol()
 float Object::getArrowTime()
 {
 	return arrowTime;
+}
+
+int Object::getTeam()
+{
+	return team;
 }
 
 int Object::getId()

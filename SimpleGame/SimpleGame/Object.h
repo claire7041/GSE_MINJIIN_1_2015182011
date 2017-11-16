@@ -3,22 +3,27 @@
 class Object
 {
 private:
+	int team;
 	int type;
+	int id;
+
 	Vec3 pos;
 	Vec3 speed;
 	Vec3 dir;
-	Color color;
 	float size;
+	Color color;
+	
 	int life;
 	float lifeTime;
+	
 	bool col;
+	
 	float time;
 	float arrowTime;
-	int id;
 
 public:
 	Object();
-	Object(Vec3 p, int type);
+	Object(Vec3 p, int team, int type);
 	~Object();
 
 	void Update(float elapsedTime);
@@ -30,6 +35,7 @@ public:
 	float getLifeTime();
 	bool getCol();
 	float getArrowTime();
+	int getTeam();
 	int getId();
 
 	void setSpeed(Vec3 s);
