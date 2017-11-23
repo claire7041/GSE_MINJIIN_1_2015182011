@@ -16,6 +16,7 @@ class SceneMgr
 	float spawnBlueTime;
 
 	GLuint buildingTex[2];
+	GLuint objTex;
 	Renderer* g_Renderer;
 
 public:

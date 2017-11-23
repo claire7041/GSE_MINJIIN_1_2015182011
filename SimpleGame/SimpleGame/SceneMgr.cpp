@@ -14,8 +14,9 @@ SceneMgr::SceneMgr(int x, int y)
 		std::cout << "Renderer could not be initialized.. \n";
 	}
 
-	buildingTex[0] = g_Renderer->CreatePngTexture("./redBuilding.png");
-	buildingTex[1] = g_Renderer->CreatePngTexture("./blueBuilding.png");
+	buildingTex[0] = g_Renderer->CreatePngTexture("./building.png");
+	buildingTex[1] = g_Renderer->CreatePngTexture("./building.png");
+	objTex = g_Renderer->CreatePngTexture("./Character.png");
 
 	charNum = 0;
 	bulletNum = 0;
@@ -95,7 +96,7 @@ void SceneMgr::Update(float elapsedTime)
 		{
 			if (building[i][j] != NULL)
 			{
-				if (building[i][j]->getArrowTime() >= 10.0f)
+				if (building[i][j]->getArrowTime() >= 3.0f)
 				{
 					AddActorObject(building[i][j]->getPos(), building[i][j]->getTeam(), OBJECT_BULLET);
 					building[i][j]->initArrowTime();
@@ -113,6 +114,15 @@ void SceneMgr::Update(float elapsedTime)
 				if (building[i][j] != NULL)
 				{
 					CollisionObjBuilding(building[i][j], arrowArray);
+					if (building[i][j]->getLife() < 1)
+					{
+						delete building[i][j];
+						building[i][j] = NULL;
+					}
+				}
+				if (building[i][j] != NULL)
+				{
+					CollisionObjBuilding(building[i][j], bulletArray);
 					if (building[i][j]->getLife() < 1)
 					{
 						delete building[i][j];
@@ -143,7 +153,7 @@ void SceneMgr::Update(float elapsedTime)
 		if (objArray[i] != NULL) 
 		{
 			objArray[i]->Update(elapsedTime);
-			if (objArray[i]->getArrowTime() >= 3.0f)
+			if (objArray[i]->getArrowTime() >= 0.5f)
 			{
 				AddActorObject(objArray[i]->getPos(), objArray[i]->getTeam(), OBJECT_ARROW);
 				arrowArray[arrowNum - 1]->setId(objArray[i]->getId());
@@ -202,26 +212,39 @@ void SceneMgr::Render()
 		for (int j = 0; j < 3; ++j)
 		{
 			if (building[i][j] != NULL)
-				g_Renderer->DrawTexturedRect(building[i][j]->getPos().x, building[i][j]->getPos().y, building[i][j]->getPos().z, building[i][j]->getSize(), building[i][j]->getColor().r, building[i][j]->getColor().g, building[i][j]->getColor().b, building[i][j]->getColor().a, buildingTex[i]);
+			{
+				g_Renderer->DrawTexturedRect(building[i][j]->getPos().x, building[i][j]->getPos().y, building[i][j]->getPos().z, building[i][j]->getSize(), building[i][j]->getColor().r, building[i][j]->getColor().g, building[i][j]->getColor().b, building[i][j]->getColor().a, buildingTex[i], building[i][j]->getLevel());
+				if(building[i][j]->getTeam() == TEAM_RED)
+					g_Renderer->DrawSolidRectGauge(building[i][j]->getPos().x, building[i][j]->getPos().y + 70, building[i][j]->getPos().z, building[i][j]->getSize(), 10.0f, building[i][j]->getColor().r, building[i][j]->getColor().g, building[i][j]->getColor().b, building[i][j]->getColor().a, (float)(building[i][j]->getLife() / 500.0f), building[i][j]->getLevel());
+				else if(building[i][j]->getTeam() == TEAM_BLUE)
+					g_Renderer->DrawSolidRectGauge(building[i][j]->getPos().x, building[i][j]->getPos().y - 70, building[i][j]->getPos().z, building[i][j]->getSize(), 10.0f, building[i][j]->getColor().r, building[i][j]->getColor().g, building[i][j]->getColor().b, building[i][j]->getColor().a, (float)(building[i][j]->getLife() / 500.0f), building[i][j]->getLevel());
+			}
 		}
 	}
 
 	for (int i = 0; i < charNum; ++i)
 	{
-		if(objArray[i] != NULL)
-			g_Renderer->DrawSolidRect(objArray[i]->getPos().x, objArray[i]->getPos().y, objArray[i]->getPos().z, objArray[i]->getSize(), objArray[i]->getColor().r, objArray[i]->getColor().g, objArray[i]->getColor().b, objArray[i]->getColor().a);
+		if (objArray[i] != NULL)
+		{
+			g_Renderer->DrawTexturedRect(objArray[i]->getPos().x, objArray[i]->getPos().y, objArray[i]->getPos().z, objArray[i]->getSize(), objArray[i]->getColor().r, objArray[i]->getColor().g, objArray[i]->getColor().b, objArray[i]->getColor().a, objTex, objArray[i]->getLevel());
+			if (objArray[i]->getTeam() == TEAM_RED)
+				g_Renderer->DrawSolidRectGauge(objArray[i]->getPos().x, objArray[i]->getPos().y + 10, objArray[i]->getPos().z, objArray[i]->getSize(), 2.5f, 1.0f, 0.0f, 0.0f, objArray[i]->getColor().a, (float)(objArray[i]->getLife() / 10.0f), objArray[i]->getLevel());
+			else if (objArray[i]->getTeam() == TEAM_BLUE)
+				g_Renderer->DrawSolidRectGauge(objArray[i]->getPos().x, objArray[i]->getPos().y - 10, objArray[i]->getPos().z, objArray[i]->getSize(), 2.5f, 0.0f, 0.0f, 1.0f, objArray[i]->getColor().a, (float)(objArray[i]->getLife() / 10.0f), objArray[i]->getLevel());
+
+		}
 	}
 
 	for (int i = 0; i < bulletNum; ++i)
 	{
 		if (bulletArray[i] != NULL)
-			g_Renderer->DrawSolidRect(bulletArray[i]->getPos().x, bulletArray[i]->getPos().y, bulletArray[i]->getPos().z, bulletArray[i]->getSize(), bulletArray[i]->getColor().r, bulletArray[i]->getColor().g, bulletArray[i]->getColor().b, bulletArray[i]->getColor().a);
+			g_Renderer->DrawSolidRect(bulletArray[i]->getPos().x, bulletArray[i]->getPos().y, bulletArray[i]->getPos().z, bulletArray[i]->getSize(), bulletArray[i]->getColor().r, bulletArray[i]->getColor().g, bulletArray[i]->getColor().b, bulletArray[i]->getColor().a, bulletArray[i]->getLevel());
 	}
 
 	for (int i = 0; i < arrowNum; ++i)
 	{
 		if (arrowArray[i] != NULL)
-			g_Renderer->DrawSolidRect(arrowArray[i]->getPos().x, arrowArray[i]->getPos().y, arrowArray[i]->getPos().z, arrowArray[i]->getSize(), arrowArray[i]->getColor().r, arrowArray[i]->getColor().g, arrowArray[i]->getColor().b, arrowArray[i]->getColor().a);
+			g_Renderer->DrawSolidRect(arrowArray[i]->getPos().x, arrowArray[i]->getPos().y, arrowArray[i]->getPos().z, arrowArray[i]->getSize(), arrowArray[i]->getColor().r, arrowArray[i]->getColor().g, arrowArray[i]->getColor().b, arrowArray[i]->getColor().a, arrowArray[i]->getLevel());
 	}
 }
 
@@ -305,10 +328,10 @@ void SceneMgr::CollisionBuilding(Object* building)
 					if (!objArray[i]->getCol() && objArray[i]->getTeam() != building->getTeam())
 					{
 						objArray[i]->setCol(true);
-						building->setColor({ 1.0f, 0.0f, 0.0f, 1.0f }, 0.1f);
+						building->setColor({ 1.0f, 1.0f, 0.0f, 1.0f }, 0.1f);
 						building->minusLife(objArray[i]->getLife());
 						objArray[i]->minusLife(20);
-						//printf("캐릭터%d수명: %d, 건물수명: %d\n", i, objArray[i]->getLife(), building->getLife());
+						//printf("%d캐릭터, %d건물수명: %d\n", objArray[i]->getTeam(), building->getTeam(), building->getLife());
 					}
 				}
 				else
@@ -360,7 +383,7 @@ void SceneMgr::CollisionObjBuilding(Object* building, Object * colObj[])
 {
 	for (int i = 0; i < MAX_OBJECTS_COUNT; ++i)
 	{
-		if (colObj[i] != NULL && building != NULL)
+		if (colObj[i] != NULL && building != NULL && colObj[i]->getTeam() != building->getTeam())
 		{
 			if (colObj[i]->getPos().x + (colObj[i]->getSize()) / 2.0f >= building->getPos().x - (building->getSize()) / 2.0f && colObj[i]->getPos().x - (colObj[i]->getSize()) / 2.0f <= building->getPos().x + (building->getSize() / 2.0f))
 			{
@@ -368,8 +391,9 @@ void SceneMgr::CollisionObjBuilding(Object* building, Object * colObj[])
 				{
 					if (building->getTeam() != colObj[i]->getTeam())
 					{
-						building->setColor({ 1.0f, 0.0f, 0.0f, 1.0f }, 0.1f);
+						building->setColor({ 1.0f, 1.0f, 0.0f, 1.0f }, 0.1f);
 						building->minusLife(colObj[i]->getLife());
+						//printf("%d팀 %d타입, %d건물수명: %d\n", colObj[i]->getTeam(), colObj[i]->getLife(), building->getTeam(), building->getLife());
 
 						delete colObj[i];
 						colObj[i] = NULL;

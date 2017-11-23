@@ -53,10 +53,10 @@ void MouseInput(int button, int state, int x, int y)
 		if (state == GLUT_DOWN)
 			flag = true;
 
-		if (flag == true && state == GLUT_UP && (WIN_Y / 2) - (float)y < 0.0f)
+		if (flag == true && state == GLUT_UP && ((float)WIN_Y / 2.0f) - (float)y < 0.0f)
 		{
 			flag = false;
-			scene->AddActorObject({ (float)x - (WIN_X / 2), (WIN_Y / 2) - (float)y, 0.0f }, TEAM_BLUE, OBJECT_CHARACTER);
+			scene->AddActorObject({ (float)x - ((float)WIN_X / 2.0f), ((float)WIN_Y / 2.0f) - (float)y - ((float)WIN_Y / 20.0f), 0.0f }, TEAM_BLUE, OBJECT_CHARACTER);
 		}
 	}
 

@@ -13,7 +13,7 @@ Object::Object(Vec3 p, int team, int type) : pos(p), team(team), type(type)
 	int x = rand() % 2;
 	int y = rand() % 2;
 
-	if(x == 0)
+	if(x == 0 && y == 0)
 		dir.x = 1;
 	else
 		dir.x = -1;
@@ -33,6 +33,7 @@ Object::Object(Vec3 p, int team, int type) : pos(p), team(team), type(type)
 		speed = { 0, 0, 0 };
 		size = 100;
 		arrowTime = 0;
+		level = 0.1f;
 
 		if(team == TEAM_RED)
 			color = { 1.0f, 0.0f, 0.0f, 1.0f };
@@ -45,11 +46,12 @@ Object::Object(Vec3 p, int team, int type) : pos(p), team(team), type(type)
 		lifeTime = 10;
 		speed = { 300, 300, 0 };
 		size = 10;
-		
+		level = 0.2f;
+
 		if (team == TEAM_RED)
-			color = { 1.0f, 0.0f, 0.0f, 1.0f };
+			color = { 1.0f, 1.0f, 1.0f, 1.0f };
 		else if (team == TEAM_BLUE)
-			color = { 0.0f, 0.0f, 1.0f, 1.0f };
+			color = { 1.0f, 1.0f, 1.0f, 1.0f };
 
 		arrowTime = 0;
 		col = false;
@@ -59,24 +61,38 @@ Object::Object(Vec3 p, int team, int type) : pos(p), team(team), type(type)
 		life = 20;
 		lifeTime = 20;
 		speed = { 600, 600, 0 };
-		size = 2;
+		size = 5;
+		level = 0.3f;
 
 		if (team == TEAM_RED)
+		{
 			color = { 1.0f, 0.0f, 0.0f, 1.0f };
+			dir.y = -1;
+		}
 		else if (team == TEAM_BLUE)
+		{
 			color = { 0.0f, 0.0f, 1.0f, 1.0f };
+			dir.y = 1;
+		}
 	}
 	else if (type == OBJECT_ARROW)
 	{
 		life = 10;
 		lifeTime = 10;
 		speed = { 100, 100, 0 };
-		size = 2;
-	
+		size = 5;
+		level = 0.3f;
+
 		if (team == TEAM_RED)
+		{
 			color = { 0.5f, 0.2f, 0.7f, 1.0f };
-		else if(team == TEAM_BLUE)
+			dir.y = -1;
+		}
+		else if (team == TEAM_BLUE)
+		{
 			color = { 1.0f, 1.0f, 0.0f, 1.0f };
+			dir.y = 1;
+		}
 	}
 }
 
@@ -130,7 +146,10 @@ void Object::Update(float elapsedTime)
 		setColorTime(elapsedTimeinsecond);
 		if (time <= 0)
 		{
-			setColor({ 1.0f, 1.0f, 0.0f, 1.0f }, 0.0f);
+			if (team == TEAM_RED)
+				setColor({ 1.0f, 0.0f, 0.0f, 1.0f }, 0.0f);
+			else if (team == TEAM_BLUE)
+				setColor({ 0.0f, 0.0f, 1.0f, 1.0f }, 0.0f);
 		}
 	}
 }
@@ -163,6 +182,11 @@ bool Object::getCol()
 float Object::getArrowTime()
 {
 	return arrowTime;
+}
+
+float Object::getLevel()
+{
+	return level;
 }
 
 int Object::getTeam()

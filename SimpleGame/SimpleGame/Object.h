@@ -11,8 +11,9 @@ private:
 	Vec3 speed;
 	Vec3 dir;
 	float size;
+	float level;
 	Color color;
-	
+
 	int life;
 	float lifeTime;
 	
@@ -30,11 +31,12 @@ public:
 
 	Color getColor();
 	Vec3 getPos();
-	float getSize();
-	int getLife();
-	float getLifeTime();
 	bool getCol();
+	float getSize();
+	float getLifeTime();
 	float getArrowTime();
+	float getLevel();
+	int getLife();
 	int getTeam();
 	int getId();
 
