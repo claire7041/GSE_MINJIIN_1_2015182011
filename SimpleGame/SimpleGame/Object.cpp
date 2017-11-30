@@ -9,6 +9,8 @@ Object::Object()
 Object::Object(Vec3 p, int team, int type) : pos(p), team(team), type(type)
 {
 	time = 0;
+	currentAnimX = 0;
+	currentAnimY = 0;
 
 	int x = rand() % 2;
 	int y = rand() % 2;
@@ -35,23 +37,23 @@ Object::Object(Vec3 p, int team, int type) : pos(p), team(team), type(type)
 		arrowTime = 0;
 		level = 0.1f;
 
-		if(team == TEAM_RED)
-			color = { 1.0f, 0.0f, 0.0f, 1.0f };
-		else if (team == TEAM_BLUE)
-			color = { 0.0f, 0.0f, 1.0f, 1.0f };
+		color = { 1.0f, 1.0f, 1.0f, 1.0f };
 	}
 	else if (type == OBJECT_CHARACTER)
 	{
 		life = 10;
 		lifeTime = 10;
 		speed = { 300, 300, 0 };
-		size = 10;
+		size = 50;
 		level = 0.2f;
 
 		if (team == TEAM_RED)
 			color = { 1.0f, 1.0f, 1.0f, 1.0f };
 		else if (team == TEAM_BLUE)
 			color = { 1.0f, 1.0f, 1.0f, 1.0f };
+
+		totalAnimX = 5;
+		totalAnimY = 1;
 
 		arrowTime = 0;
 		col = false;
@@ -60,9 +62,10 @@ Object::Object(Vec3 p, int team, int type) : pos(p), team(team), type(type)
 	{
 		life = 20;
 		lifeTime = 20;
-		speed = { 600, 600, 0 };
-		size = 5;
+		speed = { 200, 200, 0 };
+		size = 10;
 		level = 0.3f;
+		dir.x = 0;
 
 		if (team == TEAM_RED)
 		{
@@ -104,17 +107,17 @@ Object::~Object()
 void Object::Update(float elapsedTime)
 {
 	float elapsedTimeinsecond = elapsedTime / 1000.0f;
-	
+	if (type == OBJECT_CHARACTER || type == OBJECT_BULLET)
+		time += elapsedTimeinsecond;
+
 	if (type == OBJECT_CHARACTER || type == OBJECT_BUILDING)
-	{
 		arrowTime += elapsedTimeinsecond;
-	}
 
 	if (type != OBJECT_BUILDING)
 		decreaseLifeTime(elapsedTimeinsecond);
 
 	pos.x = pos.x + (speed.x * dir.x * elapsedTimeinsecond);
-	if (pos.x > (WIN_X / 2 - 5) - size || pos.x < -(WIN_X / 2 - 5) + size)
+	if (pos.x > (WIN_X / 2 - 10.0f) - size || pos.x < -(WIN_X / 2 - 10.0f) + size)
 	{
 		if (type == OBJECT_CHARACTER)
 		{
@@ -127,7 +130,7 @@ void Object::Update(float elapsedTime)
 		}
 	}
 	pos.y = pos.y + (speed.y * dir.y * elapsedTimeinsecond);
-	if (pos.y > (WIN_Y / 2 - 5) - size || pos.y < -(WIN_Y / 2 - 5) + size)
+	if (pos.y > (WIN_Y / 2 - 10.0f) - size || pos.y < -(WIN_Y / 2 - 10.0f) + size)
 	{
 		if (type == OBJECT_CHARACTER)
 		{
@@ -141,16 +144,29 @@ void Object::Update(float elapsedTime)
 	}
 	pos.z = pos.z + (speed.z * elapsedTimeinsecond);
 
-	if (time > 0)
+	if (time > 0 && type == OBJECT_BUILDING)
 	{
-		setColorTime(elapsedTimeinsecond);
-		if (time <= 0)
+		time -= elapsedTimeinsecond;
+		if (time > 0.1f)
 		{
-			if (team == TEAM_RED)
-				setColor({ 1.0f, 0.0f, 0.0f, 1.0f }, 0.0f);
-			else if (team == TEAM_BLUE)
-				setColor({ 0.0f, 0.0f, 1.0f, 1.0f }, 0.0f);
+			size += 0.3f;
 		}
+		else if (time <= 0.1f)
+		{
+			size -= 0.3f;
+		}
+	}
+	else if (time < 0 && type == OBJECT_BUILDING)
+	{
+		time = 0;
+		size = 100;
+	}
+
+	if (time > 0.2f)
+	{
+		currentAnimX = (currentAnimX + 1) % totalAnimX;
+		currentAnimY = (currentAnimY + 1) % totalAnimY;
+		time = 0;
 	}
 }
 
@@ -199,10 +215,41 @@ int Object::getId()
 	return id;
 }
 
+int Object::getCurrentAnimX()
+{
+	return currentAnimX;
+}
+
+int Object::getCurrentAnimY()
+{
+	return currentAnimY;
+}
+
+int Object::getTotalAnimX()
+{
+	return totalAnimX;
+}
+
+int Object::getTotalAnimY()
+{
+	return totalAnimY;
+}
+
 Vec3 Object::getPos()
 {
 	return pos;
 }
+
+Vec3 Object::getDir()
+{
+	return dir;
+}
+
+float Object::getTime()
+{
+	return time;
+}
+
 
 void Object::setSpeed(Vec3 s)
 {
@@ -216,8 +263,12 @@ void Object::setPos(Vec3 newPos)
 
 void Object::setColor(Color c, float t)
 {
-	time = t;
 	color = c;
+}
+
+void Object::setTime(float t)
+{
+	time = t;
 }
 
 void Object::setSize(float size)

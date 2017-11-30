@@ -17,6 +17,9 @@ class SceneMgr
 
 	GLuint buildingTex[2];
 	GLuint objTex;
+	GLuint backgroundTex;
+	GLuint particleBulletTex;
+
 	Renderer* g_Renderer;
 
 public:
