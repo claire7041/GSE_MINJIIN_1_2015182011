@@ -44,7 +44,7 @@ Object::Object(Vec3 p, int team, int type) : pos(p), team(team), type(type)
 		life = 10;
 		lifeTime = 10;
 		speed = { 300, 300, 0 };
-		size = 50;
+		size = 35;
 		level = 0.2f;
 
 		if (team == TEAM_RED)
@@ -63,7 +63,7 @@ Object::Object(Vec3 p, int team, int type) : pos(p), team(team), type(type)
 		life = 20;
 		lifeTime = 20;
 		speed = { 200, 200, 0 };
-		size = 10;
+		size = 5;
 		level = 0.3f;
 		dir.x = 0;
 
@@ -117,7 +117,7 @@ void Object::Update(float elapsedTime)
 		decreaseLifeTime(elapsedTimeinsecond);
 
 	pos.x = pos.x + (speed.x * dir.x * elapsedTimeinsecond);
-	if (pos.x > (WIN_X / 2 - 10.0f) - size || pos.x < -(WIN_X / 2 - 10.0f) + size)
+	if (pos.x > (WIN_X / 2 - 20.0f) - size || pos.x < -(WIN_X / 2 - 20.0f) + size)
 	{
 		if (type == OBJECT_CHARACTER)
 		{
@@ -130,7 +130,7 @@ void Object::Update(float elapsedTime)
 		}
 	}
 	pos.y = pos.y + (speed.y * dir.y * elapsedTimeinsecond);
-	if (pos.y > (WIN_Y / 2 - 10.0f) - size || pos.y < -(WIN_Y / 2 - 10.0f) + size)
+	if (pos.y > (WIN_Y / 2 - 20.0f) - size || pos.y < -(WIN_Y / 2 - 20.0f) + size)
 	{
 		if (type == OBJECT_CHARACTER)
 		{

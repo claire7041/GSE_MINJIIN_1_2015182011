@@ -9,6 +9,10 @@ SceneMgr::SceneMgr()
 SceneMgr::SceneMgr(int x, int y)
 {
 	g_Renderer = new Renderer(x, y);
+	m_sound = new Sound();
+	soundBG = m_sound->CreateSound("./bgm.wav");
+	m_sound->PlaySoundW(soundBG, true, 0.2f);
+
 	if (!g_Renderer->IsInitialized())
 	{
 		std::cout << "Renderer could not be initialized.. \n";
@@ -23,8 +27,10 @@ SceneMgr::SceneMgr(int x, int y)
 	charNum = 0;
 	bulletNum = 0;
 	arrowNum = 0;
-	spawnRedTime = 5.0f;
+	spawnRedTime = 4.0f;
 	spawnBlueTime = 0.0f;
+	sceneShakeTime = 0.0f;
+	startText = 5.0f;
 
 	for (int i = 0; i < 3; ++i)
 	{
@@ -93,11 +99,12 @@ void SceneMgr::Update(float elapsedTime)
 	float elapsedTimeinsecond = elapsedTime / 1000.0f;
 	spawnRedTime -= elapsedTimeinsecond;
 	spawnBlueTime -= elapsedTimeinsecond;
-	
+	startText -= elapsedTimeinsecond;
+
 	if (spawnRedTime <= 0.0f)
 	{
 		AddActorObject({(float)((rand() % WIN_X) - (WIN_X / 2)), (float)((rand() % (WIN_Y / 2))), 0.0f }, TEAM_RED, OBJECT_CHARACTER);
-		spawnRedTime = 5.0f;
+		spawnRedTime = 4.0f;
 	}
 
 	for (int i = 0; i < 2; ++i)
@@ -106,7 +113,7 @@ void SceneMgr::Update(float elapsedTime)
 		{
 			if (building[i][j] != NULL)
 			{
-				if (building[i][j]->getArrowTime() >= 3.0f)
+				if (building[i][j]->getArrowTime() >= 7.0f)
 				{
 					AddActorObject(building[i][j]->getPos(), building[i][j]->getTeam(), OBJECT_BULLET);
 					building[i][j]->initArrowTime();
@@ -260,6 +267,9 @@ void SceneMgr::Render()
 		if (arrowArray[i] != NULL)
 			g_Renderer->DrawSolidRect(arrowArray[i]->getPos().x, arrowArray[i]->getPos().y, arrowArray[i]->getPos().z, arrowArray[i]->getSize(), arrowArray[i]->getColor().r, arrowArray[i]->getColor().g, arrowArray[i]->getColor().b, arrowArray[i]->getColor().a, arrowArray[i]->getLevel());
 	}
+
+	if (startText > 0.0f)
+		g_Renderer->DrawText(0.0f, 0.0f, GLUT_BITMAP_TIMES_ROMAN_24, 0.0f, 0.0f, 0.0f, "START");
 }
 
 void SceneMgr::AddActorObject(Vec3 pos, int team, int type)
@@ -293,7 +303,7 @@ void SceneMgr::AddActorObject(Vec3 pos, int team, int type)
 			}
 
 			if (team == TEAM_BLUE)
-				spawnBlueTime = 7.0F;
+				spawnBlueTime = 4.0F;
 		}
 	}
 	else if (type == OBJECT_BULLET)
@@ -345,6 +355,7 @@ void SceneMgr::CollisionBuilding(Object* building)
 						building->minusLife(objArray[i]->getLife());
 						building->setTime(0.2f);
 						objArray[i]->minusLife(20);
+					
 						//printf("%d캐릭터, %d건물수명: %d\n", objArray[i]->getTeam(), building->getTeam(), building->getLife());
 					}
 				}
@@ -408,7 +419,7 @@ void SceneMgr::CollisionObjBuilding(Object* building, Object * colObj[])
 						building->setTime(0.2f);
 						building->minusLife(colObj[i]->getLife());
 						//printf("%d팀 %d타입, %d건물수명: %d\n", colObj[i]->getTeam(), colObj[i]->getLife(), building->getTeam(), building->getLife());
-
+						
 						delete colObj[i];
 						colObj[i] = NULL;
 					}

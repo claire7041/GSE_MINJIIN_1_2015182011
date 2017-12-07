@@ -1,6 +1,7 @@
 #pragma once
 #include "Object.h"
 #include "Renderer.h"
+#include "Sound.h"
 
 class SceneMgr
 {
@@ -14,6 +15,8 @@ class SceneMgr
 	int arrowNum;
 	float spawnRedTime;
 	float spawnBlueTime;
+	float sceneShakeTime;
+	float startText;
 
 	GLuint buildingTex[2];
 	GLuint objTex;
@@ -21,6 +24,8 @@ class SceneMgr
 	GLuint particleBulletTex;
 
 	Renderer* g_Renderer;
+	Sound* m_sound;
+	int soundBG;
 
 public:
 	SceneMgr();
