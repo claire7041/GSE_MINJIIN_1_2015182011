@@ -43,7 +43,7 @@ Object::Object(Vec3 p, int team, int type) : pos(p), team(team), type(type)
 	{
 		life = 10;
 		lifeTime = 10;
-		speed = { 300, 300, 0 };
+		speed = { 200, 200, 0 };
 		size = 35;
 		level = 0.2f;
 
@@ -62,7 +62,7 @@ Object::Object(Vec3 p, int team, int type) : pos(p), team(team), type(type)
 	{
 		life = 20;
 		lifeTime = 20;
-		speed = { 200, 200, 0 };
+		speed = { 100, 100, 0 };
 		size = 5;
 		level = 0.3f;
 		dir.x = 0;
@@ -80,10 +80,10 @@ Object::Object(Vec3 p, int team, int type) : pos(p), team(team), type(type)
 	}
 	else if (type == OBJECT_ARROW)
 	{
-		life = 10;
+		life = 5;
 		lifeTime = 10;
-		speed = { 100, 100, 0 };
-		size = 5;
+		speed = { 80, 80, 0 };
+		size = 3;
 		level = 0.3f;
 
 		if (team == TEAM_RED)
@@ -117,7 +117,7 @@ void Object::Update(float elapsedTime)
 		decreaseLifeTime(elapsedTimeinsecond);
 
 	pos.x = pos.x + (speed.x * dir.x * elapsedTimeinsecond);
-	if (pos.x > (WIN_X / 2 - 20.0f) - size || pos.x < -(WIN_X / 2 - 20.0f) + size)
+	if (pos.x > (WIN_X / 2) - size || pos.x < -(WIN_X / 2) + size)
 	{
 		if (type == OBJECT_CHARACTER)
 		{
@@ -130,7 +130,7 @@ void Object::Update(float elapsedTime)
 		}
 	}
 	pos.y = pos.y + (speed.y * dir.y * elapsedTimeinsecond);
-	if (pos.y > (WIN_Y / 2 - 20.0f) - size || pos.y < -(WIN_Y / 2 - 20.0f) + size)
+	if (pos.y > (WIN_Y / 2) - size || pos.y < -(WIN_Y / 2) + size)
 	{
 		if (type == OBJECT_CHARACTER)
 		{
@@ -162,7 +162,7 @@ void Object::Update(float elapsedTime)
 		size = 100;
 	}
 
-	if (time > 0.2f)
+	if (time > 0.2f && type != OBJECT_BULLET)
 	{
 		currentAnimX = (currentAnimX + 1) % totalAnimX;
 		currentAnimY = (currentAnimY + 1) % totalAnimY;

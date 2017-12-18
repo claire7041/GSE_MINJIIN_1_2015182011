@@ -97,6 +97,8 @@ SceneMgr::~SceneMgr()
 void SceneMgr::Update(float elapsedTime)
 {
 	float elapsedTimeinsecond = elapsedTime / 1000.0f;
+	time += elapsedTimeinsecond;
+
 	spawnRedTime -= elapsedTimeinsecond;
 	spawnBlueTime -= elapsedTimeinsecond;
 	startText -= elapsedTimeinsecond;
@@ -224,7 +226,7 @@ void SceneMgr::Update(float elapsedTime)
 void SceneMgr::Render()
 {
 	g_Renderer->DrawTexturedRect(0.0f, 0.0f, 0.0f, 800.0f, 1.0f, 1.0f, 1.0f, 1.0f, backgroundTex, 0.5f);
-
+	g_Renderer->DrawParticleClimate(0, 0, 0, 1, 1, 1, 1, 1, -0.1, -0.1, particleBulletTex, time, 0.01f);
 	for (int i = 0; i < 2; ++i)
 	{
 		for (int j = 0; j < 3; ++j)
@@ -257,7 +259,7 @@ void SceneMgr::Render()
 	{
 		if (bulletArray[i] != NULL)
 		{
-			g_Renderer->DrawParticle(bulletArray[i]->getPos().x, bulletArray[i]->getPos().y, bulletArray[i]->getPos().z, 5.0f, 1.0f, 1.0f, 1.0f, 1.0f, -bulletArray[i]->getDir().x, -bulletArray[i]->getDir().y, particleBulletTex, bulletArray[i]->getTime());
+			g_Renderer->DrawParticle(bulletArray[i]->getPos().x, bulletArray[i]->getPos().y, bulletArray[i]->getPos().z, 5.0f, 1.0f, 1.0f, 0.6f, 1.0f, -bulletArray[i]->getDir().x, -bulletArray[i]->getDir().y, particleBulletTex, bulletArray[i]->getTime(), 0.25f);
 			g_Renderer->DrawSolidRect(bulletArray[i]->getPos().x, bulletArray[i]->getPos().y, bulletArray[i]->getPos().z, bulletArray[i]->getSize(), bulletArray[i]->getColor().r, bulletArray[i]->getColor().g, bulletArray[i]->getColor().b, bulletArray[i]->getColor().a, bulletArray[i]->getLevel());
 		}
 	}

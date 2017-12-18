@@ -17,6 +17,7 @@ class SceneMgr
 	float spawnBlueTime;
 	float sceneShakeTime;
 	float startText;
+	float time;
 
 	GLuint buildingTex[2];
 	GLuint objTex;
@@ -25,6 +26,7 @@ class SceneMgr
 
 	Renderer* g_Renderer;
 	Sound* m_sound;
+
 	int soundBG;
 
 public:
