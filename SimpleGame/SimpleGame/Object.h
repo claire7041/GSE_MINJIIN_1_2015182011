@@ -22,9 +22,10 @@ private:
 	float lifeTime;
 	
 	bool col;
-	
+
 	float time;
 	float arrowTime;
+	float consistDamegeTime;
 
 public:
 	Object();
@@ -49,7 +50,8 @@ public:
 	int getTotalAnimX();
 	int getTotalAnimY();
 	float getTime();
-
+	float getType();
+	float getDamegeTime();
 
 	void setSpeed(Vec3 s);
 	void setPos(Vec3 newPos);
@@ -59,6 +61,7 @@ public:
 	void setId(int num);
 	void setTime(float t);
 	void setLifeTime();
+	void setDamegeTime(float t);
 
 	void initArrowTime();
 	void decreaseLifeTime(float elapsedTimeSecond);

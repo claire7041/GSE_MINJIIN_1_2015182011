@@ -9,7 +9,8 @@ class SceneMgr
 	Object* bulletArray[MAX_OBJECTS_COUNT];
 	Object* arrowArray[MAX_OBJECTS_COUNT];
 	Object* building[2][3];
-	
+	Object* fire;
+
 	int charNum;
 	int bulletNum;
 	int arrowNum;
@@ -18,16 +19,24 @@ class SceneMgr
 	float sceneShakeTime;
 	float startText;
 	float time;
+	float fireTime;
 
 	GLuint buildingTex[2];
 	GLuint objTex;
 	GLuint backgroundTex;
 	GLuint particleBulletTex;
+	GLuint fireTex;
 
 	Renderer* g_Renderer;
 	Sound* m_sound;
 
-	int soundBG;
+	int bgmSound;
+	int bulletSound;
+	int arrowSound;
+	int addCharacterSound;
+	int hitSound;
+	int damegeSound;
+	int fireSound;
 
 public:
 	SceneMgr();

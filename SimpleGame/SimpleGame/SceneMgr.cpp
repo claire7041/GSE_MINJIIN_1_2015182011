@@ -10,8 +10,15 @@ SceneMgr::SceneMgr(int x, int y)
 {
 	g_Renderer = new Renderer(x, y);
 	m_sound = new Sound();
-	soundBG = m_sound->CreateSound("./bgm.wav");
-	m_sound->PlaySoundW(soundBG, true, 0.2f);
+	bgmSound = m_sound->CreateSound("./bgm.wav");
+	bulletSound = m_sound->CreateSound("./bullet.wav");
+	arrowSound = m_sound->CreateSound("./arrow.wav");
+	addCharacterSound = m_sound->CreateSound("./addCh.wav");
+	hitSound = m_sound->CreateSound("./Hit8.wav");
+	fireSound = m_sound->CreateSound("./boom.wav");
+	damegeSound = m_sound->CreateSound("./damege.wav");
+
+	m_sound->PlaySoundW(bgmSound, true, 0.2f);
 
 	if (!g_Renderer->IsInitialized())
 	{
@@ -23,6 +30,7 @@ SceneMgr::SceneMgr(int x, int y)
 	buildingTex[1] = g_Renderer->CreatePngTexture("./blueBuilding.png");
 	objTex = g_Renderer->CreatePngTexture("./Character.png");
 	particleBulletTex = g_Renderer->CreatePngTexture("./particleBullet.png");
+	fireTex = g_Renderer->CreatePngTexture("./FireBall.png");
 
 	charNum = 0;
 	bulletNum = 0;
@@ -30,6 +38,7 @@ SceneMgr::SceneMgr(int x, int y)
 	spawnRedTime = 4.0f;
 	spawnBlueTime = 0.0f;
 	sceneShakeTime = 0.0f;
+	fireTime = 10.0f;
 	startText = 5.0f;
 
 	for (int i = 0; i < 3; ++i)
@@ -87,6 +96,9 @@ SceneMgr::~SceneMgr()
 			}
 		}
 	}
+
+	delete fire;
+	fire = NULL;
 	
 	/*delete[] objArray;
 	delete[] bulletArray;
@@ -102,12 +114,22 @@ void SceneMgr::Update(float elapsedTime)
 	spawnRedTime -= elapsedTimeinsecond;
 	spawnBlueTime -= elapsedTimeinsecond;
 	startText -= elapsedTimeinsecond;
+	fireTime -= elapsedTimeinsecond;
+
+	if (fireTime <= 0.0f)
+	{
+		AddActorObject({ (float)((rand() % WIN_X) - (WIN_X / 2)), (float)((rand() % WIN_Y) - (WIN_Y / 2)), 0.0f }, NULL, OBJECT_FIRE);
+		fireTime = 10.0f;
+	}
 
 	if (spawnRedTime <= 0.0f)
 	{
 		AddActorObject({(float)((rand() % WIN_X) - (WIN_X / 2)), (float)((rand() % (WIN_Y / 2))), 0.0f }, TEAM_RED, OBJECT_CHARACTER);
 		spawnRedTime = 4.0f;
 	}
+
+	if(fire != NULL)
+		CollisionBuilding(fire);
 
 	for (int i = 0; i < 2; ++i)
 	{
@@ -221,12 +243,27 @@ void SceneMgr::Update(float elapsedTime)
 			}
 		}
 	}
+
+	if (fire != NULL)
+	{
+		fire->Update(elapsedTime);
+
+		if (fire->getLifeTime() <= 0.0f)
+		{
+			delete fire;
+			fire = NULL;
+		}
+	}
 }
 
 void SceneMgr::Render()
 {
 	g_Renderer->DrawTexturedRect(0.0f, 0.0f, 0.0f, 800.0f, 1.0f, 1.0f, 1.0f, 1.0f, backgroundTex, 0.5f);
 	g_Renderer->DrawParticleClimate(0, 0, 0, 1, 1, 1, 1, 1, -0.1, -0.1, particleBulletTex, time, 0.01f);
+
+	if (fire != NULL)
+		g_Renderer->DrawTexturedRectSeq(fire->getPos().x, fire->getPos().y, fire->getPos().z, fire->getSize(), fire->getColor().r, fire->getColor().g, fire->getColor().b, fire->getColor().a, fireTex, fire->getCurrentAnimX(), fire->getCurrentAnimY(), fire->getTotalAnimX(), fire->getTotalAnimY(), fire->getLevel());
+
 	for (int i = 0; i < 2; ++i)
 	{
 		for (int j = 0; j < 3; ++j)
@@ -235,9 +272,9 @@ void SceneMgr::Render()
 			{
 				g_Renderer->DrawTexturedRect(building[i][j]->getPos().x, building[i][j]->getPos().y, building[i][j]->getPos().z, building[i][j]->getSize(), building[i][j]->getColor().r, building[i][j]->getColor().g, building[i][j]->getColor().b, building[i][j]->getColor().a, buildingTex[i], building[i][j]->getLevel());
 				if(building[i][j]->getTeam() == TEAM_RED)
-					g_Renderer->DrawSolidRectGauge(building[i][j]->getPos().x, building[i][j]->getPos().y + 70, building[i][j]->getPos().z, building[i][j]->getSize(), 10.0f, 1.0f, 0.0f, 0.0f, 1.0f, (float)(building[i][j]->getLife() / 500.0f), building[i][j]->getLevel());
+					g_Renderer->DrawSolidRectGauge(building[i][j]->getPos().x, building[i][j]->getPos().y + 70, building[i][j]->getPos().z, 100.0f, 10.0f, 1.0f, 0.0f, 0.0f, 1.0f, (float)(building[i][j]->getLife() / 500.0f), building[i][j]->getLevel());
 				else if(building[i][j]->getTeam() == TEAM_BLUE)
-					g_Renderer->DrawSolidRectGauge(building[i][j]->getPos().x, building[i][j]->getPos().y - 70, building[i][j]->getPos().z, building[i][j]->getSize(), 10.0f, 0.0f, 0.0f, 1.0f, 1.0f, (float)(building[i][j]->getLife() / 500.0f), building[i][j]->getLevel());
+					g_Renderer->DrawSolidRectGauge(building[i][j]->getPos().x, building[i][j]->getPos().y - 70, building[i][j]->getPos().z, 100.0f, 10.0f, 0.0f, 0.0f, 1.0f, 1.0f, (float)(building[i][j]->getLife() / 500.0f), building[i][j]->getLevel());
 			}
 		}
 	}
@@ -276,13 +313,16 @@ void SceneMgr::Render()
 
 void SceneMgr::AddActorObject(Vec3 pos, int team, int type)
 {
-	if (type == OBJECT_BUILDING)
+	if (type == OBJECT_FIRE)
 	{
+		m_sound->PlaySoundW(fireSound, false, 0.5f);
+		fire = new Object(pos, team, OBJECT_FIRE);
 	}
 	else if (type == OBJECT_CHARACTER)
 	{
 		if (team == TEAM_RED || (team == TEAM_BLUE && spawnBlueTime <= 0.0f))
 		{
+			m_sound->PlaySoundW(addCharacterSound, false, 0.5f);
 			if (charNum < MAX_CHARACTER_COUNT)
 			{
 				objArray[charNum] = new Object(pos, team, OBJECT_CHARACTER);
@@ -310,6 +350,7 @@ void SceneMgr::AddActorObject(Vec3 pos, int team, int type)
 	}
 	else if (type == OBJECT_BULLET)
 	{
+		m_sound->PlaySoundW(bulletSound, false, 0.2f);
 		if (bulletNum == MAX_OBJECTS_COUNT)
 		{
 			bulletNum = 0;
@@ -320,6 +361,7 @@ void SceneMgr::AddActorObject(Vec3 pos, int team, int type)
 	}
 	else if(type == OBJECT_ARROW)
 	{
+		m_sound->PlaySoundW(arrowSound, false, 0.4f);
 		if (arrowNum == MAX_OBJECTS_COUNT)
 		{
 			arrowNum = 0;
@@ -343,22 +385,31 @@ Renderer * SceneMgr::getRenderer()
 
 void SceneMgr::CollisionBuilding(Object* building)
 {
-	for (int i = 0; i < charNum; ++i)
+	if (building->getType() == OBJECT_BUILDING)
 	{
-		if (objArray[i] != NULL && building != NULL)
+		for (int i = 0; i < charNum; ++i)
 		{
-			if (objArray[i]->getPos().x + (objArray[i]->getSize()) / 2.0f >= building->getPos().x - (building->getSize()) / 2.0f && objArray[i]->getPos().x - (objArray[i]->getSize()) / 2.0f <= building->getPos().x + (building->getSize() / 2.0f))
+			if (objArray[i] != NULL && building != NULL)
 			{
-				if (objArray[i]->getPos().y + objArray[i]->getSize() / 2.0f >= building->getPos().y - (building->getSize()) / 2.0f && objArray[i]->getPos().y - (objArray[i]->getSize() / 2.0f) <= building->getPos().y + (building->getSize() / 2.0f))
+				if (objArray[i]->getPos().x + (objArray[i]->getSize()) / 2.0f >= building->getPos().x - (building->getSize()) / 2.0f && objArray[i]->getPos().x - (objArray[i]->getSize()) / 2.0f <= building->getPos().x + (building->getSize() / 2.0f))
 				{
-					if (!objArray[i]->getCol() && objArray[i]->getTeam() != building->getTeam())
+					if (objArray[i]->getPos().y + objArray[i]->getSize() / 2.0f >= building->getPos().y - (building->getSize()) / 2.0f && objArray[i]->getPos().y - (objArray[i]->getSize() / 2.0f) <= building->getPos().y + (building->getSize() / 2.0f))
 					{
-						objArray[i]->setCol(true);
-						building->minusLife(objArray[i]->getLife());
-						building->setTime(0.2f);
-						objArray[i]->minusLife(20);
-					
-						//printf("%d캐릭터, %d건물수명: %d\n", objArray[i]->getTeam(), building->getTeam(), building->getLife());
+						if (!objArray[i]->getCol() && objArray[i]->getTeam() != building->getTeam())
+						{
+							objArray[i]->setCol(true);
+							building->minusLife(objArray[i]->getLife());
+							building->setTime(0.4f);
+							objArray[i]->minusLife(20);
+							m_sound->PlaySoundW(hitSound, false, 0.3f);
+						}
+					}
+					else
+					{
+						if (objArray[i]->getCol())
+						{
+							objArray[i]->setCol(false);
+						}
 					}
 				}
 				else
@@ -369,16 +420,47 @@ void SceneMgr::CollisionBuilding(Object* building)
 					}
 				}
 			}
-			else
+		}
+	}
+	else
+	{
+		for (int i = 0; i < charNum; ++i)
+		{
+			if (objArray[i] != NULL && fire != NULL)
 			{
-				if (objArray[i]->getCol())
+				if (objArray[i]->getPos().x + (objArray[i]->getSize()) / 2.0f >= building->getPos().x - (building->getSize() / 2.0f - 50.0f) && objArray[i]->getPos().x - (objArray[i]->getSize()) / 2.0f <= building->getPos().x + (building->getSize() / 2.0f + 50.0f))
 				{
-					objArray[i]->setCol(false);
+					if (objArray[i]->getPos().y + objArray[i]->getSize() / 2.0f >= building->getPos().y - (building->getSize() / 2.0f - 50.0f) && objArray[i]->getPos().y - (objArray[i]->getSize() / 2.0f) <= building->getPos().y + (building->getSize() / 2.0f + 50.0f))
+					{
+						if (!objArray[i]->getCol())
+						{
+							if (objArray[i]->getDamegeTime() == 0.0f)
+							{
+								objArray[i]->setCol(true);
+								objArray[i]->setDamegeTime(5.0f);
+								objArray[i]->setColor({ 1.0f, 1.0f, 0.0f, 1.0f }, 0.0f);
+								m_sound->PlaySoundW(damegeSound, false, 0.3f);
+							}
+						}
+					}
+					else
+					{
+						if (objArray[i]->getCol())
+						{
+							objArray[i]->setCol(false);
+						}
+					}
+				}
+				else
+				{
+					if (objArray[i]->getCol())
+					{
+						objArray[i]->setCol(false);
+					}
 				}
 			}
 		}
 	}
-
 	
 	for (int i = 0; i < charNum; ++i)
 	{
@@ -418,10 +500,11 @@ void SceneMgr::CollisionObjBuilding(Object* building, Object * colObj[])
 				{
 					if (building->getTeam() != colObj[i]->getTeam())
 					{
-						building->setTime(0.2f);
+						building->setTime(0.4f);
 						building->minusLife(colObj[i]->getLife());
 						//printf("%d팀 %d타입, %d건물수명: %d\n", colObj[i]->getTeam(), colObj[i]->getLife(), building->getTeam(), building->getLife());
-						
+						m_sound->PlaySoundW(hitSound, false, 0.5f);
+
 						delete colObj[i];
 						colObj[i] = NULL;
 					}
@@ -450,6 +533,7 @@ void SceneMgr::CollisionObj(Object* charObj[], Object* colObj[])
 							{
 								charObj[i]->setColor({ 1.0f, 0.0f, 0.0f, 1.0f }, 0.1f);
 								charObj[i]->minusLife(colObj[j]->getLife());
+								m_sound->PlaySoundW(hitSound, false, 0.5f);
 
 								delete colObj[j];
 								colObj[j] = NULL;
@@ -502,6 +586,7 @@ void SceneMgr::CollisionChar()
 						count += 1;
 						objArray[i]->setColor({ 0.1f * (float)objArray[i]->getLife(), 0.0f, 0.0f, 1.0f }, 0);
 						objArray[i]->minusLife(1);
+						m_sound->PlaySoundW(hitSound, false, 0.5f);
 					}
 				}
 			}
